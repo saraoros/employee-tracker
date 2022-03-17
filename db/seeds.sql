@@ -1,11 +1,12 @@
--- this is where I will create the values for the tables??
-INSERT INTO department (id, name)
+-- Values for department table
+INSERT INTO department (id, department_name)
 VALUES 
 (1, "Sales"),
 (2, "Engineering"),
 (3, "Finance"),
 (4, "Legal");
 
+-- Values for role table
 INSERT INTO role (id, title, salary, department_id)
 VALUES
 (11, "Salesperson", 80000, 1),
@@ -17,6 +18,7 @@ VALUES
 (44, "Legal Team Lead", 250000, 4),
 (45, "Lawyer", 190000, 4);
 
+-- Values for employee table
 INSERT INTO employee (id, first_name, last_name, role_id, manager_id)
 VALUES
 (22, "John", "Doe", 11, null),
