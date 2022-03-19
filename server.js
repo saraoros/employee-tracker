@@ -1,7 +1,9 @@
-//require('dotenv').config();
+const connection = require('./db/connection');
 const inquirer = require('inquirer');
 //const cTable = require('console.table');
-const db = require('./db');
+
+
+// tutor notes:
 
 // function x() {
 //   return db.query('SELECT * FROM department');
@@ -23,6 +25,8 @@ const db = require('./db');
 //   });
 // }
 
+// Connecting to Database
+connection.connect();
 
 function promptQuestions() {
   console.log(`
