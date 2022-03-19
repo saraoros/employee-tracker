@@ -2,28 +2,6 @@ const connection = require('./db/connection');
 const inquirer = require('inquirer');
 const cTable = require('console.table');
 
-// tutor notes:
-
-// function x() {
-//   return db.query('SELECT * FROM department');
-// }
-// async function y() {
-//   const dept = await x();
-//   console.log(dept);
-// }
-
-// function z() {
-//   db.query('SELECT * FROM department', (err, res) => {
-//     console.log(res);
-//   });
-// }
-
-// function a() {
-//   db.query('SELECT * FROM department', (err, res) => {
-//     console.log(res);
-//   });
-// }
-
 // SELECT title, department_name
 // FROM role JOIN department
 // ON department_id = department(id);
@@ -37,6 +15,8 @@ connection.connect(
 
   *******************************************
       WELCOME TO YOUR EMPLOYEE TRACKER
+
+            LETS GET STARTED!
   *******************************************
   
   `)
@@ -83,15 +63,25 @@ function promptQuestions() {
         updateEmployee();
       }
       if (initMenu === 'Quit') {
-        connection.end();
+        // This will end server connection
+        connection.end(
+          console.log(`
+      *******************************************
+        YOUR SESSION HAS END, SEE YOU NEXT TIME!
+      *******************************************
+        
+        `)
+        );
       }
     })
     .catch((error) => {
-      if (error) throw error;
+      if (error) throw error(404);
     });
 }
 
-// Start of initMenu functions
+// Start of initMenu functions:
+
+// View All Employees function
 const allEmployees = () => {
   let sql = `SELECT * FROM employee`;
 
@@ -111,6 +101,7 @@ const allEmployees = () => {
   });
 };
 
+// View All Departments function
 const allDepartments = () => {
   let sql = `SELECT * FROM department`;
 
@@ -120,7 +111,7 @@ const allDepartments = () => {
     promptQuestions(
       console.log(`
     *******************************************
-          ALL DEPARTMENTS LISTED ABOVE
+            ALL DEPARTMENTS LISTED ABOVE
     *******************************************
 
     
@@ -130,5 +121,64 @@ const allDepartments = () => {
   });
 };
 
+// View All Roles function
+const allRoles = () => {
+  let sql = `SELECT * FROM role`;
+
+  connection.query(sql, (err, res) => {
+    if (err) throw err;
+    console.table(res);
+    promptQuestions(
+      console.log(`
+    *******************************************
+            ALL ROLES ARE LISTED ABOVE
+    *******************************************
+
+    
+    
+    `)
+    );
+  });
+};
+
+// View Add Employee function
+const addEmployee = () => {
+  let sql = ``;
+
+  connection.query(sql, (err, res) => {
+    if (err) throw err;
+    console.table(res);
+    promptQuestions(
+      console.log(`
+    *******************************************
+                NEW EMPLOYEE ADDED
+    *******************************************
+
+    
+    
+    `)
+    );
+  });
+};
+
+// Update an Employee function
+const updateEmployee = () => {
+  let sql = ``;
+
+  connection.query(sql, (err, res) => {
+    if (err) throw err;
+    console.table(res);
+    promptQuestions(
+      console.log(`
+    *******************************************
+          EMPLOYEE HAS BEEN UPDATED
+    *******************************************
+
+    
+    
+    `)
+    );
+  });
+};
 
 promptQuestions();
