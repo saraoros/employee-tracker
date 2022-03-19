@@ -1,15 +1,28 @@
 //require('dotenv').config();
-const mysql = require('mysql2');
 const inquirer = require('inquirer');
 //const cTable = require('console.table');
+const db = require('./db');
 
-const db = mysql.createConnection({
-  host: 'localhost',
-  user: process.env.DB_USER,
-  password: process.env.DB_PW,
-  database: process.env.DB_NAME,
-});
-// db.query
+// function x() {
+//   return db.query('SELECT * FROM department');
+// }
+// async function y() {
+//   const dept = await x();
+//   console.log(dept);
+// }
+
+// function z() {
+//   db.query('SELECT * FROM department', (err, res) => {
+//     console.log(res);
+//   });
+// }
+
+// function a() {
+//   db.query('SELECT * FROM department', (err, res) => {
+//     console.log(res);
+//   });
+// }
+
 
 function promptQuestions() {
   console.log(`
@@ -22,21 +35,40 @@ function promptQuestions() {
     .prompt([
       {
         type: 'list',
-        name: 'initOptions',
+        name: 'initMenu',
         message: 'What would you like to do first?',
         choices: [
           'View All Employees',
+          'View All Departments',
+          'View All Roles',
+          'Add Employee',
+          'Update Employee Role',
           'View All Employees By Department **',
           'View All Employees by Manager **',
-          'Add Employee',
           'Remove Employee **',
-          'Update Employee Role',
           'Update Employee Manager **',
         ],
       },
     ])
     .then((answers) => {
-      // Use user feedback for... whatever!!
+      const { initMenu } = answers;
+
+      if (initMenu === 'View All Employees') {
+        allEmployees();
+      }
+
+      if (initMenu === 'View All Departments') {
+        allDepartments();
+      }
+      if (initMenu === 'View All Roles') {
+        allRoles();
+      }
+      if (initMenu === 'Add Employee') {
+        addEmployee();
+      }
+      if (initMenu === 'Update Employee Role') {
+        updateEmployee();
+      }
     })
     .catch((error) => {
       if (error.isTtyError) {

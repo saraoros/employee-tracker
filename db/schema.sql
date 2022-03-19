@@ -26,6 +26,9 @@ CREATE TABLE employee (
     CONSTRAINT fk_manager_id FOREIGN KEY (manager_id) REFERENCES employee(id) ON DELETE SET NULL
 );
 
+SELECT title, department_name 
+FROM role JOIN department 
+ON department_id = department(id);
 
 -- role_id: INT to hold reference to employee role
 -- manager_id: INT to hold reference to another employee that is the manager of the current employee (null if the employee has no manager
