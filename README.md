@@ -17,7 +17,8 @@
 
   # Installation
 
-  - Run `npm install`
+  - Run `npm install` on your machine's terminal before getting started.
+  - Run `node server` to get started
 
   # Technologies
 
@@ -26,7 +27,10 @@
   - Node.js
   - MySQL2
 
-## Images of Application
+# Video Demonstration of Application
+[Walk-through Video Link Here!](https://drive.google.com/file/d/1oQYNyeujWBor201BZO7L73W2h9U9WhUw/view)
+
+# Images of Application
 
 <img src="./images/promptss.png" />
 

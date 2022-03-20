@@ -248,7 +248,7 @@ const updateEmployee = () => {
 
   connection.query()
     .then((answers) => {
-      return Promise.all([
+      return push.all([
         connection.query(`SELECT id, title FROM role ORDER BY title`),
         connection.query(
           `SELECT employee.id, employee.first_name, " ", employee.last_name AS Employee FROM employee ORDER BY Employee`
@@ -261,7 +261,7 @@ const updateEmployee = () => {
         roles.push(employees.title);
       }
       for (i = 0; i < employees.length; i++){
-        employeesNames.push(employees.Employee);
+        employees.push(employees.employee);
     }
       return push.all([roles, employees]);
     })
