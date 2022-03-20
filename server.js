@@ -2,13 +2,6 @@ const connection = require('./db/connection');
 const inquirer = require('inquirer');
 const cTable = require('console.table');
 
-// SELECT title, department_name
-// FROM role JOIN department
-// ON department_id = department(id);
-
-// -- role_id: INT to hold reference to employee role
-// -- manager_id: INT to hold reference to another employee that is the manager of the current employee (null if the employee has no manager
-
 // Connecting to Database
 connection.connect(
   console.log(`
@@ -22,6 +15,7 @@ connection.connect(
   `)
 );
 
+// Start of initial Menu questions
 function promptQuestions() {
   inquirer
     .prompt([
@@ -66,9 +60,9 @@ function promptQuestions() {
         // This will end server connection
         connection.end(
           console.log(`
-      *******************************************
-        YOUR SESSION HAS END, SEE YOU NEXT TIME!
-      *******************************************
+      *********************************************
+        YOUR SESSION HAS ENDED, SEE YOU NEXT TIME!
+      *********************************************
         
         `)
         );
@@ -129,7 +123,9 @@ const allDepartments = () => {
 
 // View All Roles function
 const allRoles = () => {
-  let sql = `SELECT * FROM role`;
+  let sql = `SELECT role.id, role.title, department.department_name AS department
+             FROM role
+             LEFT JOIN department ON role.department_id`;
 
   connection.query(sql, (err, res) => {
     if (err) throw err;
@@ -149,22 +145,105 @@ const allRoles = () => {
 
 // View Add Employee function
 const addEmployee = () => {
-  let sql = ``;
-  // need to add inquirer questions
-  connection.query(sql, (err, res) => {
-    if (err) throw err;
-    console.table(res);
-    promptQuestions(
-      console.log(`
-    *******************************************
-                NEW EMPLOYEE ADDED
-    *******************************************
+  inquirer
+    .prompt([
+      {
+        type: 'input',
+        name: 'employeeFirst',
+        message: 'What is the first name of your employee?',
+        validate: (firstName) => {
+          if (firstName) {
+            return true;
+          } else {
+            console.log(`Please enter your employee's first name`);
+            return false;
+          }
+        },
+      },
+      {
+        type: 'input',
+        name: 'employeeLast',
+        message: 'What is the last name of your employee?',
+        validate: (lastName) => {
+          if (lastName) {
+            return true;
+          } else {
+            console.log(`Please enter your employee's first name`);
+            return false;
+          }
+        },
+      },
+    ])
+    .then((answer) => {
+      const employeeInfo = [answer.employeeFirst, answer.employeeLast];
+
+      // Capture new employee's role
+      const sqlRole = `SELECT role.id, role.title
+                     FROM role`;
+
+      connection.query(sqlRole, (err, data) => {
+        if (err) throw err;
+
+        const rolesData = data.map(({ id, title }) => ({
+          name: title,
+          value: id,
+        }));
+        inquirer
+          .prompt([
+            {
+              type: 'list',
+              name: 'role',
+              message: `What is your new employee's role?`,
+              choices: rolesData,
+            },
+          ])
+          .then((newRole) => {
+            const employeeRole = newRole.employeeRole;
+            employeeInfo.push(employeeRole);
+
+            // Capture new employee's manager
+            const sqlManager = `SELECT * FROM employee`;
+            connection.query(sqlManager, (err, data) => {
+              if (err) throw err;
+              const newManager = data.map(({ id, first_name, last_name }) => ({
+                name: first_name + ' ' + last_name,
+              }));
+
+              inquirer
+                .prompt([
+                  {
+                    type: 'list',
+                    name: 'employeeManager',
+                    message: `Who is your new employee's manager?`,
+                    choices: newManager,
+                  },
+                ])
+                .then((chosenManager) => {
+                  const selectedManager = chosenManager.employeeManager;
+                  employeeInfo.push(selectedManager);
+
+                  const addEmployeesql = `INSERT INTO employee (first_name, last_name, role_id, manager_id)
+                                          VALUES (?, ?, ?, ?)`;
+                  connection.query(addEmployeesql, employeeInfo, (err) => {
+                    if (err) throw err;
+                    // console.table(res);
+                    allEmployees(
+                      console.log(`
+                 *******************************************
+                           NEW EMPLOYEE ADDED
+                 *******************************************
 
     
     
-    `)
-    );
-  });
+                  `)
+                    );
+                    promptQuestions();
+                  });
+                });
+            });
+          });
+      });
+    });
 };
 
 // Update an Employee function
