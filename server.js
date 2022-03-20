@@ -207,6 +207,7 @@ const addEmployee = () => {
               if (err) throw err;
               const newManager = data.map(({ id, first_name, last_name }) => ({
                 name: first_name + ' ' + last_name,
+                value: id,
               }));
 
               inquirer
@@ -222,21 +223,18 @@ const addEmployee = () => {
                   const selectedManager = chosenManager.employeeManager;
                   employeeInfo.push(selectedManager);
 
-                  const addEmployeesql = `INSERT INTO employee (first_name, last_name, role_id, manager_id)
+                  const addEmployeeSql = `INSERT INTO employee (first_name, last_name, role_id, manager_id)
                                           VALUES (?, ?, ?, ?)`;
-                  connection.query(addEmployeesql, employeeInfo, (err) => {
+                  connection.query(addEmployeeSql, employeeInfo, (err) => {
                     if (err) throw err;
-                    // console.table(res);
-                    allEmployees(
-                      console.log(`
-                 *******************************************
-                           NEW EMPLOYEE ADDED
-                 *******************************************
+                    console.log(`
+           *******************************************
+                      NEW EMPLOYEE ADDED
+           *******************************************
 
-    
-    
-                  `)
-                    );
+       
+                     `);
+                    //allEmployees();
                     promptQuestions();
                   });
                 });
