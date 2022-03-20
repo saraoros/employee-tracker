@@ -31,11 +31,7 @@ function promptQuestions() {
           'View All Roles',
           'Add Employee',
           'Update Employee Role',
-          'Quit',
-          'View All Employees By Department **',
-          'View All Employees by Manager **',
-          'Remove Employee **',
-          'Update Employee Manager **',
+          'Quit'
         ],
       },
     ])
