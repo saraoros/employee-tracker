@@ -248,7 +248,7 @@ const updateEmployee = () => {
 
   connection.query()
     .then((answers) => {
-      return push.all([
+      return push(answers).all([
         connection.query(`SELECT id, title FROM role ORDER BY title`),
         connection.query(
           `SELECT employee.id, employee.first_name, " ", employee.last_name AS Employee FROM employee ORDER BY Employee`
@@ -284,7 +284,7 @@ const updateEmployee = () => {
     })
     .then((answer) => {
       let roleId;
-      let employeeId;
+      let employeesId;
 
       for (i = 0; i < roles.length; i++) {
         if (answer.role === roles.title) {
@@ -294,12 +294,12 @@ const updateEmployee = () => {
 
       for (i = 0; i < employees.length; i++) {
         if (answer.employee === employees.Employee) {
-          employeeId = employees.id;
+          employeesId = employees.id;
         }
       }
 
       connection.query(
-        `UPDATE employee SET role_id = ${roleId} WHERE id = ${employeeId}`,
+        `UPDATE employee SET role_id = ${roleId} WHERE id = ${employeesId}`,
         (error, res) => {
           if (error) return error;
 
