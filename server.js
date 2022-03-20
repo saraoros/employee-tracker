@@ -1,8 +1,7 @@
 const connection = require('./db/connection');
-const promisesql = require('promise-mysql');
 const inquirer = require('inquirer');
 const cTable = require('console.table');
-const { connect } = require('./db/connection');
+
 
 // Connecting to Database
 connection.connect(
@@ -103,8 +102,8 @@ const allDepartments = () => {
              AS Departments
              FROM department`;
 
-  connection.query(sql, (err, res) => {
-    if (err) throw error;
+  connection.query(sql, (error, res) => {
+    if (error) throw error;
     console.table(res);
     promptQuestions(
       console.log(`
@@ -223,7 +222,7 @@ const addEmployee = () => {
 
                   const addEmployeeSql = `INSERT INTO employee (first_name, last_name, role_id, manager_id)
                                           VALUES (?, ?, ?, ?)`;
-                  connection.query(addEmployeeSql, employeeInfo, (err, res) => {
+                  connection.query(addEmployeeSql, employeeInfo, (error, res) => {
                     if (error) throw error;
                     console.log(`
            *******************************************
@@ -244,31 +243,27 @@ const addEmployee = () => {
 
 // Update an Employee function
 const updateEmployee = () => {
-  let employeesNames = [];
+  let employees = [];
   let roles = [];
 
-  // mysql
-  //   .createConnection(connection)
   connection.query()
-    .then((con) => {
+    .then((answers) => {
       return Promise.all([
-        con.query(`SELECT id, title FROM role ORDER BY title`),
-        con.query(
-          `SELECT employee.id, concat(employee.first_name, " ", employee.last_name) AS Employee FROM employee ORDER BY Employee`
+        connection.query(`SELECT id, title FROM role ORDER BY title`),
+        connection.query(
+          `SELECT employee.id, employee.first_name, " ", employee.last_name AS Employee FROM employee ORDER BY Employee`
         ),
       ]);
     })
     .then(([roles, employees]) => {
 
       for (i = 0; i < roles.length; i++) {
-        roles.push(employees[i].title);
+        roles.push(employees.title);
       }
       for (i = 0; i < employees.length; i++){
-        employeesNames.push(employees[i].Employee);
+        employeesNames.push(employees.Employee);
     }
-
-
-      return Promise.all([roles, employees]);
+      return push.all([roles, employees]);
     })
     .then(([roles, employees]) => {
 
@@ -277,7 +272,7 @@ const updateEmployee = () => {
           type: 'list',
           name: 'newEmployRole',
           message: 'Whose role would you like to update?',
-          choices: employeesNames,
+          choices: employees,
         },
         {
           type: 'list',
@@ -292,14 +287,14 @@ const updateEmployee = () => {
       let employeeId;
 
       for (i = 0; i < roles.length; i++) {
-        if (answer.role === roles[i].title) {
-          roleId = roles[i].id;
+        if (answer.role === roles.title) {
+          roleId = roles.id;
         }
       }
 
       for (i = 0; i < employees.length; i++) {
-        if (answer.employee === employees[i].Employee) {
-          employeeId = employees[i].id;
+        if (answer.employee === employees.Employee) {
+          employeeId = employees.id;
         }
       }
 
@@ -307,9 +302,6 @@ const updateEmployee = () => {
         `UPDATE employee SET role_id = ${roleId} WHERE id = ${employeeId}`,
         (error, res) => {
           if (error) return error;
-
-          // give user feedback
-          console.log(`${answer.employee} ROLE UPDATED TO ${answer.role}`);
 
           console.log(`
     *******************************************
