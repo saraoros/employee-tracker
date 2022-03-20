@@ -1,6 +1,8 @@
 const connection = require('./db/connection');
+const promisesql = require('promise-mysql');
 const inquirer = require('inquirer');
 const cTable = require('console.table');
+const { connect } = require('./db/connection');
 
 // Connecting to Database
 connection.connect(
@@ -84,7 +86,7 @@ const allEmployees = () => {
              AND role.id = employee.role_id`;
 
   connection.query(sql, (err, res) => {
-    if (err) throw error;
+    if (err) throw err;
     console.table(res);
     promptQuestions(
       console.log(`
@@ -106,7 +108,7 @@ const allDepartments = () => {
              FROM department`;
 
   connection.query(sql, (err, res) => {
-    if (err) throw err0r;
+    if (err) throw error;
     console.table(res);
     promptQuestions(
       console.log(`
@@ -182,7 +184,7 @@ const addEmployee = () => {
                      FROM role`;
 
       connection.query(sqlRole, (err, data) => {
-        if (err) throw error;
+        if (err) throw err;
 
         const rolesData = data.map(({ id, title }) => ({
           name: title,
@@ -204,7 +206,7 @@ const addEmployee = () => {
             // Capture new employee's manager
             const sqlManager = `SELECT * FROM employee`;
             connection.query(sqlManager, (err, data) => {
-              if (err) throw error;
+              if (err) throw err;
               const newManager = data.map(({ id, first_name, last_name }) => ({
                 name: first_name + ' ' + last_name,
                 value: id,
@@ -225,8 +227,8 @@ const addEmployee = () => {
 
                   const addEmployeeSql = `INSERT INTO employee (first_name, last_name, role_id, manager_id)
                                           VALUES (?, ?, ?, ?)`;
-                  connection.query(addEmployeeSql, employeeInfo, (err) => {
-                    if (err) throw error;
+                  connection.query(addEmployeeSql, employeeInfo, (err, res) => {
+                    if (error) throw error;
                     console.log(`
            *******************************************
                       NEW EMPLOYEE ADDED
@@ -234,7 +236,7 @@ const addEmployee = () => {
 
        
                      `);
-                    //allEmployees();
+
                     promptQuestions();
                   });
                 });
@@ -249,59 +251,80 @@ const updateEmployee = () => {
   let employeesNames = [];
   let roles = [];
 
-  
+  // mysql
+  //   .createConnection(connection)
+  connection.query()
+    .then((con) => {
+      return Promise.all([
+        con.query(`SELECT id, title FROM role ORDER BY title`),
+        con.query(
+          `SELECT employee.id, concat(employee.first_name, " ", employee.last_name) AS Employee FROM employee ORDER BY Employee`
+        ),
+      ]);
+    })
+    .then(([roles, employees]) => {
 
-  connection.query(sql, (error, res) => {
-    if (error) throw error;
+      for (i = 0; i < roles.length; i++) {
+        roles.push(employees[i].title);
+      }
+      for (i = 0; i < employees.length; i++){
+        employeesNames.push(employees[i].Employee);
+    }
 
-    
-   
-   
-    
-    let sql = `SELECT role.id, role.title FROM role`;
-    connection.query(sql, (err, res) => {
-      if (err) throw err;
-      
 
-      res.forEach((role) => {
-        roles.push(role.title);
-      });
+      return Promise.all([roles, employees]);
+    })
+    .then(([roles, employees]) => {
 
-      inquirer
-        .prompt([
-          {
-            type: 'list',
-            name: 'newEmployRole',
-            message: 'Whose role would you like to update?',
-            choices: employeesNames,
-          },
-          {
-            type: 'list',
-            name: 'employeeRoles',
-            message: `What is this employee's new role?`,
-            choices: roles,
-          },
-        ])
-        
-        .then((answer) => {
-      
-          });
+      inquirer.prompt([
+        {
+          type: 'list',
+          name: 'newEmployRole',
+          message: 'Whose role would you like to update?',
+          choices: employeesNames,
+        },
+        {
+          type: 'list',
+          name: 'employeeRoles',
+          message: `What is this employee's new role?`,
+          choices: roles,
+        },
+      ]);
+    })
+    .then((answer) => {
+      let roleId;
+      let employeeId;
 
-console.log("test")
-          let updatedEmploySql = `UPDATE employee SET employee.role_id = ? WHERE employee.id = ?`;
+      for (i = 0; i < roles.length; i++) {
+        if (answer.role === roles[i].title) {
+          roleId = roles[i].id;
+        }
+      }
 
-        
-    });
+      for (i = 0; i < employees.length; i++) {
+        if (answer.employee === employees[i].Employee) {
+          employeeId = employees[i].id;
+        }
+      }
 
-    console.log(`
+      connection.query(
+        `UPDATE employee SET role_id = ${roleId} WHERE id = ${employeeId}`,
+        (error, res) => {
+          if (error) return error;
+
+          // give user feedback
+          console.log(`${answer.employee} ROLE UPDATED TO ${answer.role}`);
+
+          console.log(`
     *******************************************
           EMPLOYEE HAS BEEN UPDATED
     *******************************************
 
     `);
-    
-  });
-  promptQuestions();
+          promptQuestions();
+        }
+      );
+    });
 };
 
 promptQuestions();
